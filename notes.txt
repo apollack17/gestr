@@ -1,0 +1,15 @@
+TABLE DESIGN
+
+USERS
+users 
+
+name
+password (not returned)
+
+Activities
+activities
+{
+    "id": 63,
+    "name": "Mile Run",
+    "description": "heart health"
+}
