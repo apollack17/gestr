@@ -1,4 +1,4 @@
-const { client } = require("./client");
+const  client  = require("./client");
 
 async function getActivityById(id){
     try {
@@ -14,11 +14,10 @@ async function getActivityById(id){
 };
 async function getAllActivities(){
     try {
-        const {rows: [activities]} = await client.query(`
-            SELECT * FROM activities
-            RETURNING *;
+        const {rows} = await client.query(`
+            SELECT * FROM activities;
         `)
-        return activities;
+        return rows;
     } catch (error) {
         throw error
     }
@@ -26,7 +25,7 @@ async function getAllActivities(){
 
 async function createActivity({name, description}) {
     try {
-        const { rows: activity } = await client.query(`
+        const { rows: [activity] } = await client.query(`
             INSERT INTO activities(name, description)
             VALUES($1, $2)
             RETURNING *;
@@ -39,7 +38,7 @@ async function createActivity({name, description}) {
 
 async function updateActivity({ id, name, description }) {
     try {
-        const { rows: activity } = await client.query(`
+        const { rows: [activity] } = await client.query(`
             UPDATE activities
             WHERE id=$1
             SET name=$2, description=$3

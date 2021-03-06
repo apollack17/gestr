@@ -5,7 +5,8 @@ async function createUser({username, password}){
         const {rows: [users]} = await client.query(`
             INSERT INTO users(username, password)
             VALUES ($1, $2)
-            RETURNING *,
+            ON CONFLICT (username) DO NOTHING
+            RETURNING *;
             `, [username, password]);
             delete users.password;
             return users;

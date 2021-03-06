@@ -1,42 +1,55 @@
 // require in the database adapter functions as you write them (createUser, createActivity...)
 // const { } = require('./');
 const { createUser } = require('./users');
-const { createActivity } = require('./activities');
+const { createActivity, getAllActivities } = require('./activities');
+const { createRoutine, getRoutinesWithoutActivities } = require('./routines');
+const { addActivityToRoutine } = require('./routine_activities');
 
 const client = require('./client');
 
 async function dropTables() {
   console.log('Dropping All Tables...');
   // drop all tables, in the correct order
-  client.query(`DROP TABLE IF EXISTS users, activities, routines, routine_activities`); 
-
+  await client.query(`DROP TABLE IF EXISTS users, activities, routines, routine_activities`); 
 }
 async function createTables() {
   console.log("Starting to build tables...");
-  client.query(`CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
-);
-CREATE TABLE activities (
-    id SERIAL PRIMARY KEY, 
-    name VARCHAR(255) UNIQUE NOT NULL,
-    description TEXT NOT NULL
-);
-CREATE TABLE routines (
-    id SERIAL PRIMARY KEY,
-    "creatorId" INTEGER FOREIGN KEY,
-    "isPublic" BOOLEAN DEFAULT false,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    goal TEXT NOT NULL
-)
-CREATE TABLE routine_activities (
-    id SERIAL PRIMARY KEY,
-    "routineId" INTEGER FOREIGN KEY,
-    "activityId" INTEGER FOREIGN KEY,
-    duration INTEGER,
-    count INTEGER,
-)`)
+  try {
+    await client.query(`CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL
+    );
+  `)
+    await client.query(`
+      CREATE TABLE activities (
+      id SERIAL PRIMARY KEY, 
+      name VARCHAR(255) UNIQUE NOT NULL,
+      description TEXT NOT NULL
+    );
+  `)
+    await client.query(`
+      CREATE TABLE routines (
+      id SERIAL PRIMARY KEY,
+      "creatorId" INTEGER REFERENCES users(id),
+      "isPublic" BOOLEAN DEFAULT false,
+      name VARCHAR(255) UNIQUE NOT NULL,
+      goal TEXT NOT NULL
+    );
+  `)
+    await client.query(`
+      CREATE TABLE routine_activities (
+      id SERIAL PRIMARY KEY,
+      "routineId" INTEGER REFERENCES routines(id),
+      "activityId" INTEGER REFERENCES activities(id),
+      duration INTEGER, 
+      count INTEGER
+    );
+  `)
+  }
+  catch(error){
+    throw error
+  }
   // create all tables, in the correct order
 }
 
@@ -113,8 +126,10 @@ async function createInitialRoutineActivities() {
   try {
     console.log('starting to create routine_activities...');
     const [bicepRoutine, chestRoutine, legRoutine, cardioRoutine] = await getRoutinesWithoutActivities();
+    console.log("Success")
     const [bicep1, bicep2, chest1, chest2, leg1, leg2, leg3] = await getAllActivities();
-
+    console.log("Success2")
+    
     const routineActivitiesToCreate = [
       {
         routineId: bicepRoutine.id,
