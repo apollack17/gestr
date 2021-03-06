@@ -4,8 +4,7 @@ async function getActivityById(id){
     try {
         const {rows: activity} = await client.query(`
             SELECT * FROM activities 
-            WHERE id = $1
-            RETURNING *;
+            WHERE id = $1;
         `, [id]);
         return activity;
     } catch (error) {
@@ -40,11 +39,10 @@ async function updateActivity({ id, name, description }) {
     try {
         const { rows: [activity] } = await client.query(`
             UPDATE activities
-            WHERE id=$1
             SET name=$2, description=$3
+            WHERE id=$1
             RETURNING *;
-        `, [id, name, description])
-
+        `, [id, name, description]);
         return activity;
     } catch (error) {
         throw error;

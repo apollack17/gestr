@@ -1,36 +1,37 @@
 const client = require("./client");
+const bcrypt = require("bcrypt");
 
-async function createUser({username, password}){
+async function createUser({ username, password }) {
+    const hashedPass = bcrypt.hashSync(password, 10);
     try {
         const {rows: [users]} = await client.query(`
             INSERT INTO users(username, password)
             VALUES ($1, $2)
             ON CONFLICT (username) DO NOTHING
-            RETURNING *;
-            `, [username, password]);
-            delete users.password;
+            RETURNING id, username;
+            `, [username, hashedPass]);
             return users;
     } catch (error) {
         throw error 
     }
 }
-async function getUser({username, password}){
+async function getUser({ username, password }) {
     try {
-        const {rows: user} = await client.query(`
+        const { rows: [user]} = await client.query(`
             SELECT * FROM users 
-            WHERE username=$1 
-            AND password=$2;
-        `, [username, password]);
-        delete user.password;
-        
-        return user;
+            WHERE username=$1;
+        `, [username]);
+        if (bcrypt.compareSync(password, user.password)) {
+            delete user.password;
+            return user;
+        }
     } catch (error) {
        throw error; 
     }
 }
 async function getUserById (id){
     try {
-        const {rows: user} = await client.query(`
+        const {rows: [user]} = await client.query(`
             SELECT * FROM users 
             WHERE id=$1;
         `, [id]);
@@ -43,7 +44,7 @@ async function getUserById (id){
 }
 async function getUserByUsername(username){
     try {
-        const {rows: user} = await client.query(`
+        const {rows: [user]} = await client.query(`
             SELECT * FROM users 
             WHERE username=$1;
         `, [username]);

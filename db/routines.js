@@ -25,10 +25,10 @@ async function getRoutinesWithoutActivities() {
 }
 async function getAllRoutines() {
   try {
-    const { rows } = await client.query(`
+    const { rows: [routines] } = await client.query(`
       SELECT * FROM routines;
     `)
-    return rows;
+    return routines;
   } catch (error) {
     throw error;
   }
@@ -70,23 +70,24 @@ async function getPublicRoutinesByActivity({ id }) {
 }
 async function createRoutine({ creatorId, isPublic, name, goal }){
   try {
-    const {rows: [routines]} = await client.query(`
+    const {rows: [activity]} = await client.query(`
       INSERT INTO routines("creatorId", "isPublic", name, goal)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
       `, [creatorId, isPublic, name, goal]);
-    return routines;
+    return activity;
   } catch (error) {
-      throw error; 
+    throw error; 
   }
 }
 async function updateRoutine({ creatorId, isPublic, name, goal }){
   try {
     const {rows: [routines]} = await client.query(`
       UPDATE routines
-      SET isPublic=$2, name=$3, goal=$4
-      WHERE id=$1;
-      `, [id, isPublic, name, goal]);
+      SET "isPublic"=$2, name=$3, goal=$4
+      WHERE "creatorId"=$1
+      RETURNING *;
+      `, [creatorId, isPublic, name, goal]);
     return routines;
   } catch (error) {
       throw error; 
