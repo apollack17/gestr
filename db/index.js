@@ -8,10 +8,5 @@ module.exports = {
     createUser,
     getUser,
     getUserById,
-<<<<<<< HEAD
     getUserByUsername
-=======
-    getUserByUsername,
-    
->>>>>>> 644ab72d40f36f4f8c167a258b08dc1f787d0c3b
 }

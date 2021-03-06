@@ -45,10 +45,10 @@ async function getUserByUsername(username){
         const {rows: user} = await client.query(`
             SELECT * FROM users 
             WHERE username=$1;
-        `, [getUserByUsername]);
+        `, [username]);
         delete user.password;
         
-        return user;
+        return user.username;
     } catch (error) {
        throw error; 
     }

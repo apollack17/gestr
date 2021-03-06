@@ -3,11 +3,12 @@
 // export the api router
 const jwt = require('jsonwebtoken');
 // const { JWT_SECRET } = process.env;
-
+const bcrypt = require('bcrypt');
 const express = require('express');
 const apiRouter = express.Router();
 
 const { createUser, getUserByUsername } = require('../db');
+const { getAllActivities } = require('../db/activities');
 
 apiRouter.get('/health', async (req, res, next) => {
   console.log('All is well from the console log.')
@@ -33,7 +34,7 @@ apiRouter.post('/users/register', async (req, res, next) => {
     if (password.length < 8) {
       throw Error('Password is too short, it must be at least 8 characters long.');
     }
-
+    // const hashedPassword = bcrypt.hashSync(password, 10)
     await createUser({username, password});
 
     res.send({ 
@@ -81,4 +82,17 @@ apiRouter.post('/users/login', async (req, res, next) => {
 
 apiRouter.get('/users/me', async (req, res, next) => {
  
+})
+
+apiRouter.get('/users/:username/routines', async (req, res, next) => {
+  
+})
+
+apiRouter.get('/activities', async (req, res, next) => {
+  try {
+    const activities = await getAllActivities();
+    res.send(activities);
+  } catch (error) {
+    next(error)
+  }
 })
