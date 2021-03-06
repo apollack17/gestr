@@ -2,41 +2,53 @@
 // const { } = require('./');
 const { createUser } = require('./users');
 const { createActivity } = require('./activities');
+const { createRoutine } = require('./routines')
 
 const client = require('./client');
 
 async function dropTables() {
   console.log('Dropping All Tables...');
   // drop all tables, in the correct order
-  client.query(`DROP TABLE IF EXISTS users, activities, routines, routine_activities`); 
-
+  await client.query(`DROP TABLE IF EXISTS users, activities, routines, routine_activities`); 
 }
 async function createTables() {
   console.log("Starting to build tables...");
-  client.query(`CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
-);
-CREATE TABLE activities (
+  try{
+  await client.query(`CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL
+    );
+  `)
+  await client.query(`
+    CREATE TABLE activities (
     id SERIAL PRIMARY KEY, 
     name VARCHAR(255) UNIQUE NOT NULL,
     description TEXT NOT NULL
-);
-CREATE TABLE routines (
+);`)
+  await client.query(`
+    CREATE TABLE routines (
     id SERIAL PRIMARY KEY,
-    "creatorId" INTEGER FOREIGN KEY,
+    "creatorId" INTEGER REFERENCES users(id),
     "isPublic" BOOLEAN DEFAULT false,
     name VARCHAR(255) UNIQUE NOT NULL,
     goal TEXT NOT NULL
-)
-CREATE TABLE routine_activities (
+  );`)
+  await client.query(`
+    CREATE TABLE routine_activities (
     id SERIAL PRIMARY KEY,
-    "routineId" INTEGER FOREIGN KEY,
-    "activityId" INTEGER FOREIGN KEY,
+    "routineId" INTEGER UNIQUE REFERENCES routines(id),
+    "activityId" INTEGER UNIQUE REFERENCES activities(id),
     duration INTEGER,
-    count INTEGER,
-)`)
+    count INTEGER
+);
+  `)
+
+
+}
+  catch(error){
+    throw error
+  }
   // create all tables, in the correct order
 }
 

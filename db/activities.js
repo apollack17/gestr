@@ -1,4 +1,4 @@
-const { client } = require("./client");
+const  client  = require("./client");
 
 async function getActivityById(id){
     try {
@@ -26,7 +26,7 @@ async function getAllActivities(){
 
 async function createActivity({name, description}) {
     try {
-        const { rows: activity } = await client.query(`
+        const { rows: [activity] } = await client.query(`
             INSERT INTO activities(name, description)
             VALUES($1, $2)
             RETURNING *;
@@ -39,7 +39,7 @@ async function createActivity({name, description}) {
 
 async function updateActivity({ id, name, description }) {
     try {
-        const { rows: activity } = await client.query(`
+        const { rows: [activity] } = await client.query(`
             UPDATE activities
             WHERE id=$1
             SET name=$2, description=$3
