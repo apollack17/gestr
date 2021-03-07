@@ -1,10 +1,5 @@
 const client = require("./client");
-<<<<<<< HEAD
-const {getRoutineActivityById} = require("./routine_activities")
-
-=======
 const { getRoutineActivityById } = require("./routine_activities");
->>>>>>> 2fd5387ce5e4b77e95c7eadffa1e89665d0ce9b3
 
 async function getRoutineById(id) {
   try {
@@ -32,21 +27,6 @@ async function getRoutinesWithoutActivities() {
 async function getAllRoutines() {
   try {
     const { rows } = await client.query(`
-<<<<<<< HEAD
-    SELECT routines.*, users.username AS "creatorName"
-    FROM routines
-    JOIN users ON routines."creatorId" = users.id;
-    
-
-    `)
-    rows.map((row) => {
-      row.activities = [getRoutineActivityById(row.id)] 
-    })
-    // loop through rows
-    // define an activities key routine.activity
-    // have a function grab all the routine activities that 
-    // match routine.id and assign it to routine.activity
-=======
       SELECT routines.*, users.username AS "creatorName"
       FROM routines
       JOIN users ON routines."creatorId" = users.id;
@@ -54,7 +34,6 @@ async function getAllRoutines() {
     for (routine of rows) {
       routine.activities = getRoutineActivityById(routine.id);
     }
->>>>>>> 2fd5387ce5e4b77e95c7eadffa1e89665d0ce9b3
     return rows;
   } catch (error) {
     throw error;
@@ -63,7 +42,9 @@ async function getAllRoutines() {
 async function getAllPublicRoutines() {
   try {
     const { rows } = await client.query(`
-      SELECT * FROM routines, activities
+      SELECT routines.* , users.username AS "creatorName"
+      FROM routines
+      JOIN users ON routines."creatorId" = users.id
       WHERE "isPublic"= true;
     `)
     return rows;
@@ -75,8 +56,24 @@ async function getAllRoutinesByUser({ username }) {
   //This function needs work possibly
   try {
     const { rows } = await client.query(`
-      SELECT * FROM routines
+      SELECT routines.*, users.username AS "creatorName"
+      FROM routines
+      JOIN users ON routines."creatorId" = users.id
       WHERE username=$1;
+    `, [username])
+    return rows;
+  } catch (error) {
+    throw error;
+  }
+}
+async function getPublicRoutinesByUser({ username }) {
+  //This function needs work possibly
+  try {
+    const { rows } = await client.query(`
+      SELECT routines.*, users.username AS "creatorName"
+      FROM routines
+      JOIN users ON routines."creatorId" = users.id
+      WHERE username=$1 AND "isPublic"=true;
     `, [username])
     return rows;
   } catch (error) {
@@ -87,7 +84,9 @@ async function getPublicRoutinesByActivity({ id }) {
   //This function needs more studying
   try {
     const { rows } = await client.query(`
-      SELECT * FROM routines
+      SELECT routines.*, users.username AS "creatorName", 
+      FROM routines
+      JOIN users ON routines."creatorId" = users.id
       WHERE id=$1;
     `, [id])
     return rows;
@@ -137,6 +136,7 @@ module.exports = {
   getRoutinesWithoutActivities,
   getAllRoutines,
   getAllPublicRoutines,
+  getPublicRoutinesByUser,
   getAllRoutinesByUser,
   getPublicRoutinesByActivity,
   createRoutine,
