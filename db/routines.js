@@ -1,4 +1,6 @@
 const client = require("./client");
+const {getRoutineActivityById} = require("./routine_activities")
+
 
 async function getRoutineById(id) {
   try {
@@ -25,10 +27,21 @@ async function getRoutinesWithoutActivities() {
 }
 async function getAllRoutines() {
   try {
-    const { rows: [routines] } = await client.query(`
-      SELECT * FROM routines;
+    const { rows } = await client.query(`
+    SELECT routines.*, users.username AS "creatorName"
+    FROM routines
+    JOIN users ON routines."creatorId" = users.id;
+    
+
     `)
-    return routines;
+    rows.map((row) => {
+      row.activities = [getRoutineActivityById(row.id)] 
+    })
+    // loop through rows
+    // define an activities key routine.activity
+    // have a function grab all the routine activities that 
+    // match routine.id and assign it to routine.activity
+    return rows;
   } catch (error) {
     throw error;
   }

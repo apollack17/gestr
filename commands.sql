@@ -28,3 +28,11 @@ CREATE TABLE routine_activities (
     count INTEGER,
 )
 
+SELECT routines.*, users.username AS "creatorName"
+    FROM routines
+    JOIN users ON routines."creatorId" = users.id;
+
+SELECT * from routines JOIN routine_activities ON routines.id = routine_activities."routineId";
+-----------------------------------------------------------------------
+JOIN routine_activities ON routines.count = routine_activities.count
+JOIN routine_activies ON routines.duration = routine_activities.duration;
