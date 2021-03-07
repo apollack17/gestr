@@ -1,4 +1,5 @@
 const client = require("./client");
+const { getRoutineActivityById } = require("./routine_activities");
 
 async function getRoutineById(id) {
   try {
@@ -25,10 +26,15 @@ async function getRoutinesWithoutActivities() {
 }
 async function getAllRoutines() {
   try {
-    const { rows: [routines] } = await client.query(`
-      SELECT * FROM routines;
+    const { rows } = await client.query(`
+      SELECT routines.*, users.username AS "creatorName"
+      FROM routines
+      JOIN users ON routines."creatorId" = users.id;
     `)
-    return routines;
+    for (routine of rows) {
+      routine.activities = getRoutineActivityById(routine.id);
+    }
+    return rows;
   } catch (error) {
     throw error;
   }
@@ -36,7 +42,7 @@ async function getAllRoutines() {
 async function getAllPublicRoutines() {
   try {
     const { rows } = await client.query(`
-      SELECT * FROM routines
+      SELECT * FROM routines, activities
       WHERE "isPublic"= true;
     `)
     return rows;

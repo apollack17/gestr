@@ -1,17 +1,18 @@
 const client = require("./client");
 
-async function getRoutineActivityById({id}){
+async function getRoutineActivityById(id) {
+    
+    //Join activities table to the routine activities table where activity id is the same as routine id
     try {
-       const {rows: routine_activity} = await client.query(`
+       const { rows } = await client.query(`
             SELECT * FROM routine_activities
-            WHERE id=$1
-            RETURNING *;
+            WHERE id=$1;
        `,[id]);
-       return routine_activity; 
+       return rows;
     } catch (error) {
         throw error
     }
-}
+}8
 async function addActivityToRoutine({ routineId, activityId, count, duration }){
     try {
        const {rows: [routine_activity]} = await client.query(`
