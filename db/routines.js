@@ -115,34 +115,44 @@ async function getPublicRoutinesByUser({ username }) {
 async function getPublicRoutinesByActivity({ id }) {
   //This function needs more studying
   try {
-    const { rows } = await client.query(`
-      SELECT routines.*, users.username AS "creatorName", 
+    const { rows: routines } = await client.query(`
+      SELECT routines.*, users.username AS "creatorName"
       FROM routines
       JOIN users ON routines."creatorId" = users.id
-      WHERE id=$1;
-    `, [id])
-    return rows;
+      WHERE "isPublic"=true;
+    `)
+    const { rows: activities } = await client.query(`
+      SELECT routine_activities.*, routines.*
+      FROM routine_activities
+      JOIN routines
+      ON routine_activities."activityId"=routines."creatorId"
+      WHERE "activityId"=$1;
+    `, [id]);
+    for (routine of routines) {
+      routine.activities = activities
+    }
+    return routines;
   } catch (error) {
     throw error;
   }
 }
 async function createRoutine({ creatorId, isPublic, name, goal }){
   try {
-    const {rows: [activity]} = await client.query(`
+    const {rows} = await client.query(`
       INSERT INTO routines("creatorId", "isPublic", name, goal)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
       `, [creatorId, isPublic, name, goal]);
-    return activity;
+    return rows;
   } catch (error) {
     throw error; 
   }
 }
 async function updateRoutine({ creatorId, isPublic, name, goal }){
   try {
-    const {rows: [routines]} = await client.query(`
+    const {rows: routines} = await client.query(`
       UPDATE routines
-      SET "isPublic"=$2, name=$3, goal=$4
+      SET ${ isPublic ? `"isPublic"=$2` : ''} ${ name ? "name=$3" : ''} ${ goal ? "goal=$4" : ''}
       WHERE "creatorId"=$1
       RETURNING *;
       `, [creatorId, isPublic, name, goal]);
@@ -154,7 +164,7 @@ async function updateRoutine({ creatorId, isPublic, name, goal }){
 
 async function destroyRoutine({id}){
   try {
-    const {rows: [routines]} = await client.query(`
+    const {rows: routines} = await client.query(`
       DELETE routines
       WHERE id=$1;
       `, [id]);
