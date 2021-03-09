@@ -2,7 +2,7 @@
 const client = require ('./client')
 const { createUser, getUser, getUserById, getUserByUsername } = require ('./users')
 const { getActivityById, getAllActivities, createActivity, updateActivity} = require ('./activities')
-const { getRoutineById, getRoutinesWithoutActivities, getAllRoutines, getAllPublicRoutines, getAllRoutinesByUser, getPublicRoutinesByActivity, createRoutine, updateRoutine, destroyRoutine} = require('./routines')
+const { getRoutineById, getRoutinesWithoutActivities, getAllRoutines, getAllPublicRoutines, getAllRoutinesByUser, getPublicRoutinesByUser, getPublicRoutinesByActivity, createRoutine, updateRoutine, destroyRoutine} = require('./routines')
 const { getRoutineActivityById, addActivityToRoutine, updateRoutineActivity, destroyRoutineActivity} = require ('./routine_activities')
 
 module.exports = {
@@ -21,6 +21,7 @@ module.exports = {
     getAllPublicRoutines,
     getAllRoutinesByUser,
     getPublicRoutinesByActivity,
+    getPublicRoutinesByUser,
     createRoutine,
     updateRoutine,
     destroyRoutine,
