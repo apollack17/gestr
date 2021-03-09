@@ -26,15 +26,22 @@ async function getRoutinesWithoutActivities() {
 }
 async function getAllRoutines() {
   try {
-    const { rows } = await client.query(`
+    const { rows: routines } = await client.query(`
       SELECT routines.*, users.username AS "creatorName"
       FROM routines
-      JOIN users ON routines."creatorId" = users.id;
-    `)
-    for (routine of rows) {
-      routine.activities = getRoutineActivityById(routine.id);
+      JOIN users
+      ON routines."creatorId"=users.id
+    `);
+    const { rows: activities } = await client.query(`
+      SELECT routine_activities.*, routines.*
+      FROM routine_activities
+      JOIN routines
+      ON routine_activities."activityId"=routines."creatorId"
+    `);
+    for (routine of routines) {
+      routine.activities = activities
     }
-    return rows;
+    return routines;
   } catch (error) {
     throw error;
   }

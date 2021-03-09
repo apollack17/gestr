@@ -1,6 +1,6 @@
 const client = require("./client");
 
-async function getRoutineActivityById(id) {
+async function getRoutineActivityById({id}) {
     
     //Join activities table to the routine activities table where activity id is the same as routine id
     try {
