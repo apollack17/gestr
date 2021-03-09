@@ -1,14 +1,13 @@
 const client = require("./client");
-const { getRoutineActivityById } = require("./routine_activities");
 
 async function getRoutineById(id) {
   try {
-    const { rows: routine } = await client.query(`
+    const { rows } = await client.query(`
       SELECT * FROM routines
       WHERE id=$1;
     `, [id]);
 
-    return routine;
+    return rows;
   } catch (error) {
     throw error;
   }
@@ -131,6 +130,8 @@ async function getPublicRoutinesByActivity({ id }) {
     for (routine of routines) {
       routine.activities = activities
     }
+    console.log("Where's my activities", activities);
+    console.log("Here is the routines", routines);
     return routines;
   } catch (error) {
     throw error;
@@ -138,41 +139,47 @@ async function getPublicRoutinesByActivity({ id }) {
 }
 async function createRoutine({ creatorId, isPublic, name, goal }){
   try {
-    const {rows} = await client.query(`
+    const { rows } = await client.query(`
       INSERT INTO routines("creatorId", "isPublic", name, goal)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *;
+      VALUES ($1, $2, $3, $4);
       `, [creatorId, isPublic, name, goal]);
     return rows;
   } catch (error) {
     throw error; 
   }
 }
-async function updateRoutine({ creatorId, isPublic, name, goal }){
+async function updateRoutine({ id, isPublic, name, goal }){
   try {
     const {rows: routines} = await client.query(`
       UPDATE routines
-      SET ${ isPublic ? `"isPublic"=$2` : ''} ${ name ? "name=$3" : ''} ${ goal ? "goal=$4" : ''}
-      WHERE "creatorId"=$1
+      SET "isPublic"=$2, name=$3, goal=$4
+      WHERE id=$1
       RETURNING *;
-      `, [creatorId, isPublic, name, goal]);
+      `, [id, isPublic, name, goal]);
     return routines;
   } catch (error) {
       throw error; 
   }
 }
 
-async function destroyRoutine({id}){
+async function destroyRoutine(id) {
   try {
-    const {rows: routines} = await client.query(`
-      DELETE routines
-      WHERE id=$1;
+    const {rows: routine} = await client.query(`
+      DELETE FROM routines
+      WHERE id=$1
+      RETURNING *;
       `, [id]);
-    return routines;
+    await client.query(`
+      DELETE FROM routine_activities
+      WHERE "routineId"=$1
+      RETURNING *;
+    `, [id]);
+    return routine;
   } catch (error) {
     throw error;
   }
 }
+
 module.exports = {
   getRoutineById,
   getRoutinesWithoutActivities,
