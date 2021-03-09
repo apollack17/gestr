@@ -48,41 +48,66 @@ async function getAllRoutines() {
 }
 async function getAllPublicRoutines() {
   try {
-    const { rows } = await client.query(`
+    const { rows: routines } = await client.query(`
       SELECT routines.* , users.username AS "creatorName"
       FROM routines
       JOIN users ON routines."creatorId" = users.id
       WHERE "isPublic"= true;
-    `)
-    return rows;
+    `);
+    const { rows: activities } = await client.query(`
+      SELECT routine_activities.*, routines.*
+      FROM routine_activities
+      JOIN routines
+      ON routine_activities."activityId"=routines."creatorId";
+    `);
+    for (routine of routines) {
+      routine.activities = activities
+    }
+    return routines;
   } catch (error) {
     throw error;
   }
 }
 async function getAllRoutinesByUser({ username }) {
-  //This function needs work possibly
   try {
-    const { rows } = await client.query(`
+    const { rows: routines } = await client.query(`
       SELECT routines.*, users.username AS "creatorName"
       FROM routines
       JOIN users ON routines."creatorId" = users.id
       WHERE username=$1;
-    `, [username])
-    return rows;
+    `, [username]);
+    const { rows: activities } = await client.query(`
+      SELECT routine_activities.*, routines.*
+      FROM routine_activities
+      JOIN routines
+      ON routine_activities."activityId"=routines."creatorId";
+    `);
+    for (routine of routines) {
+      routine.activities = activities
+    }
+    return routines;
   } catch (error) {
     throw error;
   }
 }
 async function getPublicRoutinesByUser({ username }) {
-  //This function needs work possibly
   try {
-    const { rows } = await client.query(`
+    const { rows: routines } = await client.query(`
       SELECT routines.*, users.username AS "creatorName"
       FROM routines
       JOIN users ON routines."creatorId" = users.id
       WHERE username=$1 AND "isPublic"=true;
     `, [username])
-    return rows;
+    const { rows: activities } = await client.query(`
+      SELECT routine_activities.*, routines.*
+      FROM routine_activities
+      JOIN routines
+      ON routine_activities."activityId"=routines."creatorId";
+    `);
+    for (routine of routines) {
+      routine.activities = activities
+    }
+    return routines;
   } catch (error) {
     throw error;
   }
