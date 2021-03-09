@@ -148,14 +148,19 @@ async function createRoutine({ creatorId, isPublic, name, goal }){
     throw error; 
   }
 }
-async function updateRoutine({ id, isPublic, name, goal }){
+function dbFields(fields){
+  const insert = Object.keys(fields).map((key, index) => `"${ key }"=$${ index + 1 }`).join(', ');
+  const select = Object.keys(fields).map((_, index) => `$${index + 1}`).join(', ');
+}
+async function updateRoutine({ update }){
   try {
+    dbFields({update});
     const {rows: routines} = await client.query(`
       UPDATE routines
-      SET "isPublic"=$2, name=$3, goal=$4
+      SET (${Object.keys(update).map((key, idx)=>`"${ key }"=$${ idx + 1 }`).join(', ') })
       WHERE id=$1
       RETURNING *;
-      `, [id, isPublic, name, goal]);
+      `, Object.keys(update));
     return routines;
   } catch (error) {
       throw error; 
