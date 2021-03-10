@@ -150,9 +150,9 @@ async function createRoutine({ creatorId, isPublic, name, goal }) {
 async function updateRoutine({ id, isPublic, name, goal }) {
   console.log(id)
   const fields = { isPublic: isPublic, name: name, goal: goal }
-  if (isPublic === undefined) delete fields.isPublic;
-  if (name === undefined) delete fields.name;
-  if (goal === undefined) delete fields.goal;
+  if (isPublic === undefined || isPublic === null) delete fields.isPublic;
+  if (name === undefined || name === null) delete fields.name;
+  if (goal === undefined || goal === null) delete fields.goal;
   const setString = Object.keys(fields).map(
     (key, index) => `"${ key }"=$${ index + 1 }`
   ).join(', ');
