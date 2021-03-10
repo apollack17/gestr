@@ -96,3 +96,5 @@ apiRouter.get('/activities', async (req, res, next) => {
     next(error)
   }
 })
+
+module.exports = apiRouter;
