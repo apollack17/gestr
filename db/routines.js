@@ -1,7 +1,6 @@
 const client = require("./client");
 
 async function getRoutineById(id) {
-  console.log(id)
   try {
     const { rows: [routine] } = await client.query(`
       SELECT * FROM routines
@@ -18,7 +17,6 @@ async function getRoutinesWithoutActivities() {
     const { rows } = await client.query(`
       SELECT * FROM routines;
     `);
-    console.log(rows);
     return rows;
   } catch (error) {
     throw error
@@ -141,14 +139,12 @@ async function createRoutine({ creatorId, isPublic, name, goal }) {
       VALUES ($1, $2, $3, $4)
       RETURNING *;
       `, [creatorId, isPublic, name, goal]);
-    console.log(routine)
     return routine;
   } catch (error) {
     throw error; 
   }
 }
 async function updateRoutine({ id, isPublic, name, goal }) {
-  console.log(id)
   const fields = { isPublic: isPublic, name: name, goal: goal }
   if (isPublic === undefined || isPublic === null) delete fields.isPublic;
   if (name === undefined || name === null) delete fields.name;
