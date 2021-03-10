@@ -148,19 +148,19 @@ async function createRoutine({ creatorId, isPublic, name, goal }){
     throw error; 
   }
 }
-function queryFields(fields){
-  const insert = Object.keys(fields).map((key, index) => `"${ key }"=$${ index + 1 }`).join(', ');
-  const select = Object.keys(fields).map((_, index) => `$${index + 1}`).join(', ');
-}
-async function updateRoutine({ update }){
+
+async function updateRoutine(id, updates = {}){
+  const setString = Object.keys(updates).map(
+      (key, index) => `"${ key }"=$${ index + 1 }`
+      ).join(', ');
   try {
-    queryFields({update});
+    if (setString.length > 0)
     const {rows: routines} = await client.query(`
       UPDATE routines
-      SET (${insert})
+      SET ${ setString }
       WHERE id=$1
       RETURNING *;
-      `,[`${select}`]);
+      `, Object.values(updates));
     return routines;
   } catch (error) {
       throw error; 
