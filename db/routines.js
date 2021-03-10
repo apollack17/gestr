@@ -1,13 +1,14 @@
 const client = require("./client");
 
 async function getRoutineById(id) {
+  console.log(id)
   try {
-    const { rows } = await client.query(`
+    const { rows: [routine] } = await client.query(`
       SELECT * FROM routines
       WHERE id=$1;
     `, [id]);
 
-    return rows;
+    return routine;
   } catch (error) {
     throw error;
   }
@@ -112,7 +113,6 @@ async function getPublicRoutinesByUser({ username }) {
   }
 }
 async function getPublicRoutinesByActivity({ id }) {
-  //This function needs more studying
   try {
     const { rows: routines } = await client.query(`
       SELECT routines.*, users.username AS "creatorName"
@@ -124,38 +124,51 @@ async function getPublicRoutinesByActivity({ id }) {
       SELECT routine_activities.*, routines.*
       FROM routine_activities
       JOIN routines
-      ON routine_activities."activityId"=routines."creatorId"
-      WHERE "activityId"=$1;
+      ON routine_activities."activityId"=$1;
     `, [id]);
     for (routine of routines) {
       routine.activities = activities
     }
-    console.log("Where's my activities", activities);
-    console.log("Here is the routines", routines);
     return routines;
   } catch (error) {
     throw error;
   }
 }
-async function createRoutine({ creatorId, isPublic, name, goal }){
+async function createRoutine({ creatorId, isPublic, name, goal }) {
   try {
-    const { rows } = await client.query(`
+    const { rows: [routine] } = await client.query(`
       INSERT INTO routines("creatorId", "isPublic", name, goal)
-      VALUES ($1, $2, $3, $4);
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
       `, [creatorId, isPublic, name, goal]);
-    return rows;
+    console.log(routine)
+    return routine;
   } catch (error) {
     throw error; 
   }
 }
-async function updateRoutine({ id, isPublic, name, goal }){
+async function updateRoutine({ id, isPublic, name, goal }) {
+  console.log(id)
+  const fields = { isPublic: isPublic, name: name, goal: goal }
+  if (isPublic === undefined) delete fields.isPublic;
+  if (name === undefined) delete fields.name;
+  if (goal === undefined) delete fields.goal;
+  const setString = Object.keys(fields).map(
+    (key, index) => `"${ key }"=$${ index + 1 }`
+  ).join(', ');
+
+  // return early if this is called without fields
+  if (setString.length === 0) {
+    return;
+  }
+
   try {
-    const {rows: routines} = await client.query(`
+    const {rows: [routines]} = await client.query(`
       UPDATE routines
-      SET "isPublic"=$2, name=$3, goal=$4
-      WHERE id=$1
+      SET ${setString}
+      WHERE id=${id}
       RETURNING *;
-      `, [id, isPublic, name, goal]);
+      `, Object.values(fields));
     return routines;
   } catch (error) {
       throw error; 

@@ -80,13 +80,13 @@ apiRouter.post('/users/login', async (req, res, next) => {
   }
 });
 
-apiRouter.get('/users/me', async (req, res, next) => {
+// apiRouter.get('/users/me', async (req, res, next) => {
  
-})
+// })
 
-apiRouter.get('/users/:username/routines', async (req, res, next) => {
+// apiRouter.get('/users/:username/routines', async (req, res, next) => {
   
-})
+// })
 
 apiRouter.get('/activities', async (req, res, next) => {
   try {
