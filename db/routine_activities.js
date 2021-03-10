@@ -40,6 +40,7 @@ async function updateRoutineActivity({ id, count, duration }){
         throw error; 
     }
   }
+  
 async function destroyRoutineActivity(id) {
     try {
         const { rows: [deleted] } = await client.query(`
