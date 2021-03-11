@@ -127,9 +127,7 @@ async function createInitialRoutineActivities() {
   try {
     console.log('starting to create routine_activities...');
     const [bicepRoutine, chestRoutine, legRoutine, cardioRoutine] = await getRoutinesWithoutActivities();
-    console.log("Success")
     const [bicep1, bicep2, chest1, chest2, leg1, leg2, leg3] = await getAllActivities();
-    console.log("Success2")
     
     const routineActivitiesToCreate = [
       {

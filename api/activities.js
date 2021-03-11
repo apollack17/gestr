@@ -15,18 +15,20 @@ activityRouter.post('/', async (req, res, next) => {
   const {name, description} = req.body;
   try {
     const newActivity = await createActivity(name, description);
+    res.send(newActivity)
   } catch (error) {
-    console.error(error)
-  } next(newActivity) 
+    next(error)
+  } 
 });
 
 activityRouter.patch('/', async (req, res, next) => {
   const {id, name, description} = req.body;
   try {
     const patchedActivity = await updateActivity(id, name, description);
+    res.send(patchedActivity)
   } catch (error) {
-    console.error(error)
-  } next(patchedActivity) 
+    next(error)
+  }
 });
 
 module.exports = activityRouter;

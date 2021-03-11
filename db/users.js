@@ -2,15 +2,16 @@ const client = require("./client");
 const bcrypt = require("bcrypt");
 
 async function createUser({ username, password }) {
-    const hashedPass = bcrypt.hashSync(password, 10);
+    // const hashedPass = bcrypt.hashSync(password, 10);
     try {
         const {rows: [users]} = await client.query(`
             INSERT INTO users(username, password)
             VALUES ($1, $2)
             ON CONFLICT (username) DO NOTHING
             RETURNING id, username;
-            `, [username, hashedPass]);
-            return users;
+            `, [username, password]);
+        console.log(users)
+        return users;
     } catch (error) {
         throw error 
     }
@@ -21,7 +22,7 @@ async function getUser({ username, password }) {
             SELECT * FROM users 
             WHERE username=$1;
         `, [username]);
-        if (bcrypt.compareSync(password, user.password)) {
+        if (user.password === password) {
             delete user.password;
             return user;
         }
