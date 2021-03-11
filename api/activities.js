@@ -1,5 +1,6 @@
 const express = require('express');
 const activityRouter = express.Router();
+const { getAllActivities, createActivity, updateActivity } = require('../db');
 
 activityRouter.get('/', async (req, res, next) => {
   try {
