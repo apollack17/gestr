@@ -1,8 +1,9 @@
 const express = require('express');
 const usersRouter = express.Router();
-const bcrypt = require('bcrypt');
 const { getUserByUsername, createUser, getPublicRoutinesByUser } = require('../db');
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = process.env;
+const { requireUser } = require('./utils');
 
 usersRouter.post('/register', async (req, res, next) => {
   const { username, password } = req.body;
@@ -10,30 +11,29 @@ usersRouter.post('/register', async (req, res, next) => {
     const testUser = await getUserByUsername(username);
     if (testUser) {
       res.status(401)
-      return next({
+      next({
         name: 'UserExistsError',
         message: 'A user by that username already exists'
       });
-    }
-
-    if (password.length > 7) {
+    } else if (password.length < 8) {
+      res.status(401)
+      next({
+        name: 'PasswordError',
+        message: 'Password must be at least 8 characters in length'
+      })
+    } else {
       const createdUser = await createUser({ username, password });
+      console.log("This is the created user:", createdUser);
       const token = jwt.sign({
         id: createdUser.id,
         username: createdUser.username
       },
-        process.env.JWT_SECRET
+        JWT_SECRET
       );
       res.send({
         message: "Thank you for signing up",
         token: token,
         user: createdUser
-      })
-    } else {
-      res.status(401)
-      return next({
-        name: 'PasswordError',
-        message: 'Password must be at least 8 characters in length'
       })
     }
   } catch ({ name, message }) {
@@ -45,7 +45,7 @@ usersRouter.post('/login', async (req, res, next) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return next({
+    next({
       name: "Missing Credentials Error",
       message: "Please supply both a username and password"
     });
@@ -53,13 +53,12 @@ usersRouter.post('/login', async (req, res, next) => {
 
   try {
     const user = await getUserByUsername(username);
-
-    if (user && user.password === password) {
+    if (user) {
       const token = jwt.sign({
         id: user.id,
         username: user.username
       },
-        process.env.JWT_SECRET
+        JWT_SECRET
       );
       res.send({ message: "you're logged in!", 'token': token });
     } else {
@@ -69,25 +68,31 @@ usersRouter.post('/login', async (req, res, next) => {
       });
     }
   } catch(error) {
-    console.log(error);
+    console.error(error);
     next(error);
   }
 });
 
-// usersRouter.get('/me', async (req, res, next) => {
- 
-// })
-
+usersRouter.get('/me', requireUser, async (req, res, next) => {
+  const authHeader = req.headers.authorization
+  try{
+      if(authHeader){
+      res.send(req.user)
+      } else {
+          res.status(401)
+          next({
+              name: 'Invalid Token',
+              message: 'Unauthorized user'
+          })
+      }
+  } catch ({name, message}){
+      next({name, message})
+  }
+});
 usersRouter.get('/:username/routines', async (req, res, next) => {
-  const { username } = req.body;
+  const { username } = req.params;
   try {
-    const allRoutines = await getPublicRoutinesByUser(username);
-
-    const routines = allRoutines.filter(routine => {
-      return routine;
-    })
-    console.log(allRoutines)
-    console.log(routines)
+    const allRoutines = await getPublicRoutinesByUser({username});
     res.send(allRoutines)
   } catch (error) {
     next(error)
