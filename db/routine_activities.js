@@ -48,6 +48,7 @@ async function destroyRoutineActivity(id) {
             WHERE id=$1
             RETURNING *;
         `, [id]);
+        console.log(deleted)
         return deleted;
     } catch (error) {
       throw error;

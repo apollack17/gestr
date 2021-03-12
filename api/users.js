@@ -23,7 +23,6 @@ usersRouter.post('/register', async (req, res, next) => {
       })
     } else {
       const createdUser = await createUser({ username, password });
-      console.log("This is the created user:", createdUser);
       const token = jwt.sign({
         id: createdUser.id,
         username: createdUser.username
@@ -42,7 +41,7 @@ usersRouter.post('/register', async (req, res, next) => {
 });
 
 usersRouter.post('/login', async (req, res, next) => {
-  const { username, password } = req.body;
+  const { username, password, token } = req.body;
 
   if (!username || !password) {
     next({
@@ -74,21 +73,22 @@ usersRouter.post('/login', async (req, res, next) => {
 });
 
 usersRouter.get('/me', requireUser, async (req, res, next) => {
-  const authHeader = req.headers.authorization
+  const authHeader = req.header('Authorization')
   try{
-      if(authHeader){
-      res.send(req.user)
-      } else {
-          res.status(401)
-          next({
-              name: 'Invalid Token',
-              message: 'Unauthorized user'
-          })
-      }
+    if(authHeader){
+    res.send(req.user)
+    } else {
+      res.status(401)
+      next({
+          name: 'Invalid Token',
+          message: 'Unauthorized user'
+      })
+    }
   } catch ({name, message}){
       next({name, message})
   }
 });
+
 usersRouter.get('/:username/routines', async (req, res, next) => {
   const { username } = req.params;
   try {
