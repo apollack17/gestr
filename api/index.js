@@ -45,6 +45,7 @@ apiRouter.use(async (req, res, next) => {
   }
 });
 
+
 const usersRouter = require('./users');
 const activityRouter = require('./activities');
 const routineRouter = require('./routines');

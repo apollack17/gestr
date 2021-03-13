@@ -48,7 +48,6 @@ async function destroyRoutineActivity(id) {
             WHERE id=$1
             RETURNING *;
         `, [id]);
-        console.log(deleted)
         return deleted;
     } catch (error) {
       throw error;
@@ -61,6 +60,7 @@ async function getRoutineActivitiesByRoutine({ id }) {
             SELECT * FROM routine_activities
             WHERE "routineId"=$1;
         `, [id])
+        console.log('These are the rows:', rows)
         return rows;
     } catch (error) {
         throw error;

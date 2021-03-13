@@ -1,6 +1,6 @@
 const express = require('express');
 const usersRouter = express.Router();
-const { getUserByUsername, createUser, getPublicRoutinesByUser } = require('../db');
+const { getUser, getUserByUsername, createUser, getPublicRoutinesByUser } = require('../db');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 const { requireUser } = require('./utils');
@@ -41,7 +41,7 @@ usersRouter.post('/register', async (req, res, next) => {
 });
 
 usersRouter.post('/login', async (req, res, next) => {
-  const { username, password, token } = req.body;
+  const { username, password } = req.body;
 
   if (!username || !password) {
     next({
@@ -51,7 +51,7 @@ usersRouter.post('/login', async (req, res, next) => {
   }
 
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUser({username, password});
     if (user) {
       const token = jwt.sign({
         id: user.id,

@@ -18,6 +18,7 @@ async function createUser({ username, password }) {
         throw error 
     }
 }
+
 async function getUserByUsername(username){
     try {
         const {rows: [user]} = await client.query(`

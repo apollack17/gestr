@@ -16,7 +16,6 @@ routineActivityRouter.patch('/:routineActivityId', requireUser, async (req, res,
 
 routineActivityRouter.delete('/:routineActivityId', requireUser, async (req, res, next) => {
   const { routineActivityId } = req.params;
-  console.log('This is the routine activity Id', routineActivityId);
   try {
     const deletedActivity = await destroyRoutineActivity(routineActivityId);
     res.send(deletedActivity);
