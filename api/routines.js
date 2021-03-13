@@ -51,11 +51,10 @@ routineRouter.post('/:routineId/activities', async (req, res, next) => {
   try {
     const { routineId } = req.params;
     const { activityId, count, duration } = req.body;
-    const routine = await getRoutineActivitiesByRoutine({ id: routineId})
+    const routine = await getRoutineActivitiesByRoutine({ id: Number(routineId) })
     const matchedRoutineActivity = routine.filter(routine => {
       return routine.activityId === activityId;
     })
-    console.log('this is the matched routine activity', matchedRoutineActivity);
     if (matchedRoutineActivity.length) {
       res.status(401);
       next({
@@ -63,7 +62,7 @@ routineRouter.post('/:routineId/activities', async (req, res, next) => {
         message: 'This activity already exists'
     })
     } else {
-      const addedRoutineActivity = await addActivityToRoutine({ routineId: id, activityId, count, duration });
+      const addedRoutineActivity = await addActivityToRoutine({ routineId, activityId, count, duration });
       res.send(addedRoutineActivity);
     }
   } catch ({name, message}) {
